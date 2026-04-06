@@ -1,0 +1,18 @@
+{% extends 'librarian/base_librarian.html.twig' %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ title }}</h2>
+    <a href="{{ path('app_librarian_languages') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+</div>
+<div class="card p-4" style="max-width:400px">
+    {{ form_start(form) }}
+    <div class="mb-3">{{ form_label(form.name) }}{{ form_widget(form.name, {attr: {class: 'form-control'}}) }}{{ form_errors(form.name) }}</div>
+    <div class="mb-3">{{ form_label(form.code) }}{{ form_widget(form.code, {attr: {class: 'form-control'}}) }}{{ form_errors(form.code) }}</div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Enregistrer</button>
+        <a href="{{ path('app_librarian_languages') }}" class="btn btn-outline-secondary">Annuler</a>
+    </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

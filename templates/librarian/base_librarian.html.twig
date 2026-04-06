@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block sidebar %}
+{% if is_granted('ROLE_ADMIN') %}
+    {{ include('admin/_sidebar.html.twig') }}
+{% else %}
+<div class="col-md-2 sidebar py-3 d-none d-md-block" style="padding-top:1rem!important">
+    <div class="sidebar-title">
+        <i class="bi bi-archive me-2"></i>Bibliothécaire
+    </div>
+    <div class="sidebar-heading">Vue d'ensemble</div>
+    <a href="{{ path('app_librarian_dashboard') }}"
+       class="{{ app.request.attributes.get('_route') == 'app_librarian_dashboard' ? 'active' : '' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+    <div class="sidebar-heading">Catalogue</div>
+    <a href="{{ path('app_librarian_books') }}"
+       class="{{ 'app_librarian_books' in app.request.attributes.get('_route') ? 'active' : '' }}">
+        <i class="bi bi-book"></i> Livres
+    </a>
+    <a href="{{ path('app_librarian_authors') }}"
+       class="{{ 'app_librarian_authors' in app.request.attributes.get('_route') ? 'active' : '' }}">
+        <i class="bi bi-person-lines-fill"></i> Auteurs
+    </a>
+    <a href="{{ path('app_librarian_categories') }}"
+       class="{{ 'app_librarian_categories' in app.request.attributes.get('_route') ? 'active' : '' }}">
+        <i class="bi bi-tags"></i> Catégories
+    </a>
+    <a href="{{ path('app_librarian_languages') }}"
+       class="{{ 'app_librarian_languages' in app.request.attributes.get('_route') ? 'active' : '' }}">
+        <i class="bi bi-translate"></i> Langues
+    </a>
+    <div class="sidebar-heading">Gestion</div>
+    <a href="{{ path('app_librarian_reservations') }}"
+       class="{{ app.request.attributes.get('_route') == 'app_librarian_reservations' ? 'active' : '' }}">
+        <i class="bi bi-calendar2-check"></i> Prêts
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block main_class %}col-md-10{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil — BiblioConnect{% endblock %}
+
+{% block body %}
+<div class="row g-4">
+
+    {# Colonne gauche : carte identité #}
+    <div class="col-md-3">
+        <div class="card p-4 text-center">
+            {% if is_granted('ROLE_ADMIN') %}
+                <i class="bi bi-shield-lock-fill" style="font-size:4rem; color:#dc3545"></i>
+            {% elseif is_granted('ROLE_LIBRARIAN') %}
+                <i class="bi bi-archive-fill" style="font-size:4rem; color:#2c3e6b"></i>
+            {% else %}
+                <i class="bi bi-person-circle" style="font-size:4rem; color:#2c3e6b"></i>
+            {% endif %}
+
+            <h4 class="mt-2 mb-1">{{ user.fullName }}</h4>
+            <p class="text-muted small mb-2">{{ user.email }}</p>
+
+            {% if is_granted('ROLE_ADMIN') %}
+                <span class="badge bg-danger">Administrateur</span>
+            {% elseif is_granted('ROLE_LIBRARIAN') %}
+                <span class="badge bg-primary">Bibliothécaire</span>
+            {% else %}
+                <span class="badge bg-success">Usager</span>
+            {% endif %}
+
+            <hr>
+            <p class="text-muted small mb-1"><i class="bi bi-calendar3"></i> Membre depuis le {{ user.createdAt|date('d/m/Y') }}</p>
+        </div>
+
+        <div class="card mt-3 p-3">
+            <h6 class="fw-bold mb-2">Accès rapide</h6>
+            <div class="d-grid gap-1">
+                <a href="{{ path('app_books') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-search"></i> Catalogue</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-danger btn-sm"><i class="bi bi-shield-lock"></i> Dashboard admin</a>
+                    <a href="{{ path('app_admin_users') }}" class="btn btn-outline-danger btn-sm"><i class="bi bi-people"></i> Utilisateurs</a>
+                    <a href="{{ path('app_admin_comments') }}" class="btn btn-outline-danger btn-sm"><i class="bi bi-chat-left-text"></i> Commentaires</a>
+                {% elseif is_granted('ROLE_LIBRARIAN') %}
+                    <a href="{{ path('app_librarian_dashboard') }}" class="btn btn-primary btn-sm"><i class="bi bi-archive"></i> Espace bibliothécaire</a>
+                    <a href="{{ path('app_librarian_book_new') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Ajouter un livre</a>
+                    <a href="{{ path('app_librarian_reservations') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-calendar-check"></i> Réservations</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Colonne droite #}
+    <div class="col-md-9">
+
+        {# Stats admin #}
+        {% if is_granted('ROLE_ADMIN') and extra_stats is not empty %}
+        <div class="row g-3 mb-4">
+            <div class="col-sm-3">
+                <div class="card text-white bg-danger text-center p-3">
+                    <i class="bi bi-people fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.total_users }}</h4>
+                    <small>Utilisateurs</small>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card text-white bg-dark text-center p-3">
+                    <i class="bi bi-book fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.total_books }}</h4>
+                    <small>Livres</small>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card text-white bg-warning text-center p-3">
+                    <i class="bi bi-hourglass-split fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.pending_reservations }}</h4>
+                    <small>Réservations en attente</small>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card text-white bg-secondary text-center p-3">
+                    <i class="bi bi-chat-left-dots fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.pending_comments }}</h4>
+                    <small>Commentaires à modérer</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Stats bibliothécaire #}
+        {% if is_granted('ROLE_LIBRARIAN') and not is_granted('ROLE_ADMIN') and extra_stats is not empty %}
+        <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+                <div class="card text-white bg-primary text-center p-3">
+                    <i class="bi bi-book fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.total_books }}</h4>
+                    <small>Livres dans le catalogue</small>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card text-white bg-warning text-center p-3">
+                    <i class="bi bi-hourglass-split fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.pending_reservations }}</h4>
+                    <small>En attente de confirmation</small>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card text-white bg-secondary text-center p-3">
+                    <i class="bi bi-calendar-check fs-3"></i>
+                    <h4 class="my-1">{{ extra_stats.all_reservations }}</h4>
+                    <small>Réservations totales</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Réservations #}
+        <div class="card mb-4">
+            <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar-check"></i> Mes réservations ({{ reservations|length }})</span>
+                <a href="{{ path('app_books') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus"></i> Nouvelle réservation
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if reservations is empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-x" style="font-size:2rem"></i>
+                        <p class="mt-2 mb-0">Aucune réservation pour le moment.</p>
+                    </div>
+                {% else %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>Livre</th><th>Du</th><th>Au</th><th>Statut</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for res in reservations %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_book_show', {id: res.book.id}) }}" class="text-decoration-none fw-semibold">
+                                        {{ res.book.title }}
+                                    </a>
+                                </td>
+                                <td class="text-muted small">{{ res.startDate|date('d/m/Y') }}</td>
+                                <td class="text-muted small">{{ res.endDate|date('d/m/Y') }}</td>
+                                <td>
+                                    <span class="badge {{ res.status == 'approved' ? 'bg-success' : (res.status == 'pending' ? 'bg-warning text-dark' : (res.status == 'returned' ? 'bg-secondary' : 'bg-danger')) }}">
+                                        {{ res.statusLabel }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Favoris #}
+        <div class="card mb-4">
+            <div class="card-header fw-bold">
+                <i class="bi bi-heart-fill text-danger"></i> Mes favoris ({{ favorites|length }})
+            </div>
+            <div class="card-body">
+                {% if favorites is empty %}
+                    <div class="text-center py-3 text-muted">
+                        <i class="bi bi-heart" style="font-size:2rem"></i>
+                        <p class="mt-2 mb-0">Aucun favori. Ajoutez des livres depuis le catalogue.</p>
+                    </div>
+                {% else %}
+                    <div class="row row-cols-2 row-cols-md-4 g-2">
+                        {% for book in favorites %}
+                            <div class="col">
+                                <div class="card h-100">
+                                    {% if book.coverImage %}
+                                        <img src="/uploads/books/{{ book.coverImage }}" class="card-img-top" alt="{{ book.title }}" style="height:110px; object-fit:cover">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:110px">
+                                            <i class="bi bi-book text-secondary fs-3"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body p-2">
+                                        <p class="small fw-bold mb-1" style="line-height:1.2">{{ book.title }}</p>
+                                        <a href="{{ path('app_book_show', {id: book.id}) }}" class="btn btn-outline-primary btn-sm w-100">Voir</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Mes avis #}
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-chat-left-quote"></i> Mes avis ({{ my_comments|length }})
+            </div>
+            <div class="card-body p-0">
+                {% if my_comments is empty %}
+                    <div class="text-center py-3 text-muted">
+                        <i class="bi bi-chat-left" style="font-size:2rem"></i>
+                        <p class="mt-2 mb-0">Vous n'avez encore posté aucun avis.</p>
+                    </div>
+                {% else %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>Livre</th><th>Note</th><th>Extrait</th><th>Date</th><th>Statut</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for comment in my_comments %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_book_show', {id: comment.book.id}) }}" class="text-decoration-none">
+                                        {{ comment.book.title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% for i in 1..5 %}
+                                        <i class="bi bi-star{% if i <= comment.rating %}-fill star-fill{% endif %}" style="font-size:.8rem"></i>
+                                    {% endfor %}
+                                </td>
+                                <td class="text-muted small">{{ comment.content|slice(0, 60) }}{% if comment.content|length > 60 %}…{% endif %}</td>
+                                <td class="text-muted small">{{ comment.createdAt|date('d/m/Y') }}</td>
+                                <td>
+                                    {% if comment.approved %}
+                                        <span class="badge bg-success">Publié</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">En attente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

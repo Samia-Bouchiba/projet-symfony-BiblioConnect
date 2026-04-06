@@ -1,0 +1,50 @@
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Dashboard — Administration{% endblock %}
+
+{% block body %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Tableau de bord</h2>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card text-white text-center p-3" style="background:#2c3e6b">
+            <i class="bi bi-people fs-2"></i>
+            <h3 class="mt-2">{{ total_users }}</h3>
+            <p class="mb-0">Utilisateurs</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success text-center p-3">
+            <i class="bi bi-book fs-2"></i>
+            <h3 class="mt-2">{{ total_books }}</h3>
+            <p class="mb-0">Livres</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning text-center p-3">
+            <i class="bi bi-hourglass-split fs-2"></i>
+            <h3 class="mt-2">{{ pending_reservations }}</h3>
+            <p class="mb-0">Réservations en attente</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger text-center p-3">
+            <i class="bi bi-chat-left-dots fs-2"></i>
+            <h3 class="mt-2">{{ pending_comments }}</h3>
+            <p class="mb-0">Commentaires à modérer</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Actions rapides</h5>
+            <div class="d-grid gap-2">
+                <a href="{{ path('app_librarian_book_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Ajouter un livre</a>
+                <a href="{{ path('app_admin_reservations') }}" class="btn btn-outline-warning"><i class="bi bi-calendar-check"></i> Gérer les réservations</a>
+                <a href="{{ path('app_admin_comments') }}" class="btn btn-outline-danger"><i class="bi bi-chat-left-text"></i> Modérer les commentaires</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

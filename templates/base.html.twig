@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BiblioConnect{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📚</text></svg>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #2c3e6b;
+            --accent:  #e8b84b;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .navbar { background: var(--primary) !important; }
+        .navbar-brand { font-weight: 700; font-size: 1.3rem; color: var(--accent) !important; }
+        .btn-primary  { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: #1a2545; border-color: #1a2545; }
+        .btn-outline-primary { color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover { background: var(--primary); border-color: var(--primary); }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,.08); border-radius: 8px; }
+        .card-img-top { height: 220px; object-fit: cover; border-radius: 8px 8px 0 0; }
+        .star-fill { color: #f39c12; }
+        .sidebar { background: var(--primary); color: #fff; }
+        .sidebar a {
+            color: rgba(255,255,255,.8);
+            text-decoration: none;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 6px;
+            margin: 1px 6px;
+            font-size: .9rem;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+        }
+        .sidebar-heading {
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,.45);
+            padding: 10px 16px 4px;
+        }
+        .sidebar-title {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--accent);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            margin-bottom: 4px;
+        }
+
+        /* ── Page loader overlay ── */
+        #page-loader {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,0,.45);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity .3s ease;
+        }
+        #page-loader.done {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader-spinner {
+            width: 56px; height: 56px;
+            border: 5px solid rgba(255,255,255,.25);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Flash toasts ── */
+        .flash-container {
+            position: fixed; top: 68px; right: 16px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px; max-width: 360px;
+            pointer-events: none;
+        }
+        .flash-toast {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
+            font-size: .9rem; pointer-events: all;
+            animation: toastIn .25s ease;
+        }
+        .flash-toast .flash-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .flash-toast .flash-msg  { flex: 1; }
+        .flash-toast .btn-close  { flex-shrink: 0; filter: none; }
+        .flash-toast.alert-success { background:#d1e7dd; color:#0a3622; border-left:4px solid #198754; }
+        .flash-toast.alert-danger  { background:#f8d7da; color:#58151c; border-left:4px solid #dc3545; }
+        .flash-toast.alert-warning { background:#fff3cd; color:#664d03; border-left:4px solid #ffc107; }
+        .flash-toast.alert-info    { background:#cff4fc; color:#055160; border-left:4px solid #0dcaf0; }
+        @keyframes toastIn {
+            from { opacity:0; transform:translateX(24px); }
+            to   { opacity:1; transform:translateX(0); }
+        }
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<script>
+(function () {
+    var l = document.getElementById('page-loader');
+
+    function hide() { l.classList.add('done'); }
+    function show() { l.classList.remove('done'); }
+
+    // Masquer dès que la page est prête
+    document.addEventListener('DOMContentLoaded', hide);
+
+    // Réafficher sur tout clic de lien interne (pas nouvelle onglet, pas ancre, pas externe)
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href || href.charAt(0) === '#' || href.indexOf('javascript') === 0) return;
+        if (a.target === '_blank' || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+        // liens externes
+        if (a.hostname && a.hostname !== location.hostname) return;
+        show();
+    });
+
+    // Réafficher sur soumission de formulaire (sauf AJAX)
+    document.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
+        show();
+    });
+
+    // Masquer si on revient en arrière depuis le bfcache (bouton retour navigateur)
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) hide();
+    });
+})();
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">
+            <i class="bi bi-book-half"></i> BiblioConnect
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ path('app_books') }}">Catalogue</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if app.user %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                                <i class="bi bi-shield-lock"></i> Admin
+                            </a>
+                        </li>
+                    {% elseif is_granted('ROLE_LIBRARIAN') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_librarian_dashboard') }}">
+                                <i class="bi bi-archive"></i> Bibliothécaire
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ app.user.firstName }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ path('app_user_profile') }}"><i class="bi bi-person me-2"></i>Mon profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_login') }}">Connexion</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_register') }}">Inscription</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{# Flash toasts container #}
+{% set flashIcons = {'success': 'bi-check-circle-fill', 'danger': 'bi-x-circle-fill', 'error': 'bi-x-circle-fill', 'warning': 'bi-exclamation-triangle-fill', 'info': 'bi-info-circle-fill'} %}
+<div class="flash-container" id="flashContainer">
+    {% for type, messages in app.flashes %}
+        {% set alertType = (type == 'error') ? 'danger' : type %}
+        {% for message in messages %}
+            <div class="flash-toast alert-{{ alertType }}" role="alert">
+                <i class="bi {{ flashIcons[type] ?? 'bi-info-circle-fill' }} flash-icon"></i>
+                <span class="flash-msg">{{ message }}</span>
+                <button type="button" class="btn-close btn-close-sm" aria-label="Fermer"
+                        onclick="this.closest('.flash-toast').remove()"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+
+<div class="container-fluid flex-grow-1">
+    <div class="row h-100">
+        {% block sidebar %}{% endblock %}
+        <div class="{% block main_class %}col-12{% endblock %} py-4 px-4">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+    <small>&copy; {{ "now"|date("Y") }} BiblioConnect</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Auto-dismiss flash toasts after 4 s
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.flash-toast').forEach(function (toast) {
+        setTimeout(function () {
+            toast.style.transition = 'opacity .4s ease';
+            toast.style.opacity = '0';
+            setTimeout(function () { toast.remove(); }, 400);
+        }, 4000);
+    });
+});
+</script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

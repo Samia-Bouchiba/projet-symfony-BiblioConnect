@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil — BiblioConnect{% endblock %}
+
+{% block body %}
+
+{# Hero #}
+<div class="py-5 mb-4 rounded-3 text-white" style="background: linear-gradient(135deg, #2c3e6b, #1a2545);">
+    <div class="container py-2">
+        <h1 class="display-5 fw-bold"><i class="bi bi-book-half"></i> BiblioConnect</h1>
+        <p class="fs-5 mb-4">Votre bibliothèque en ligne. Réservez, découvrez, lisez.</p>
+        <form action="{{ path('app_books') }}" method="get" class="d-flex gap-2" style="max-width: 520px;">
+            <input type="text" name="q" class="form-control form-control-lg" placeholder="Rechercher un titre, auteur, catégorie...">
+            <button class="btn btn-warning btn-lg px-4">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+{# Catégories #}
+{% if categories %}
+    <h3 class="mb-3">Parcourir par catégorie</h3>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% for category in categories %}
+            <a href="{{ path('app_books', {category: category.id}) }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{# Derniers livres #}
+<h3 class="mb-3">Nouveautés</h3>
+<div class="row row-cols-2 row-cols-md-4 g-3">
+    {% for book in recent_books %}
+        <div class="col">
+            <div class="card h-100">
+                {% if book.coverImage %}
+                    <img src="/uploads/books/{{ book.coverImage }}" class="card-img-top" alt="{{ book.title }}">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px">
+                        <i class="bi bi-book text-secondary" style="font-size:3rem"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h6 class="card-title fw-bold">{{ book.title }}</h6>
+                    <p class="card-text text-muted small">
+                        {% for author in book.authors %}{{ author.fullName }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    {% if book.averageRating %}
+                        <div class="small mb-1">
+                            {% for i in 1..5 %}
+                                <i class="bi bi-star{% if i <= book.averageRating %}-fill star-fill{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <span class="badge {{ book.available ? 'bg-success' : 'bg-danger' }}">
+                        {{ book.available ? 'Disponible' : 'Indisponible' }}
+                    </span>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ path('app_book_show', {id: book.id}) }}" class="btn btn-primary btn-sm w-100">
+                        Voir le livre
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12"><p class="text-muted">Aucun livre dans le catalogue pour le moment.</p></div>
+    {% endfor %}
+</div>
+
+{% endblock %}

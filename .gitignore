@@ -1,0 +1,60 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+###> uploads — images téléchargées, non versionnées ###
+/public/uploads/
+###< uploads ###
+
+###> IDEs ###
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+###< IDEs ###
+
+###> OS ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+###< OS ###
+
+###> Logs & cache locaux ###
+*.log
+/var/log/
+/var/cache/
+###< Logs ###
+
+###> Coverage ###
+/coverage/
+/.coverage
+/build/
+###< Coverage ###
+
+###> Scripts utilitaires temporaires (à ne pas committer) ###
+check_covers*.php
+###< Scripts ###

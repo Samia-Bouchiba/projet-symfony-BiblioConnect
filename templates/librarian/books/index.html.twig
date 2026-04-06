@@ -1,0 +1,49 @@
+{% extends 'librarian/base_librarian.html.twig' %}
+{% block title %}Livres — Bibliothécaire{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-book"></i> Catalogue des livres</h2>
+    <a href="{{ path('app_librarian_book_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Ajouter</a>
+</div>
+<div class="card">
+    <table class="table table-hover mb-0">
+        <thead class="table-dark">
+            <tr><th>Couverture</th><th>Titre</th><th>Auteurs</th><th>Catégories</th><th>Stock</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        {% for book in books %}
+            <tr>
+                <td>
+                    {% if book.coverImage %}
+                        <img src="/uploads/books/{{ book.coverImage }}" style="height:50px;width:35px;object-fit:cover" class="rounded">
+                    {% else %}
+                        <i class="bi bi-book text-muted" style="font-size:1.5rem"></i>
+                    {% endif %}
+                </td>
+                <td><strong>{{ book.title }}</strong></td>
+                <td class="small">{% for a in book.authors %}{{ a.fullName }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                <td class="small">{% for c in book.categories %}<span class="badge bg-light text-dark">{{ c.name }}</span>{% endfor %}</td>
+                <td>
+                    <span class="badge {{ book.stock > 0 ? 'bg-success' : 'bg-danger' }}">{{ book.stock }}</span>
+                </td>
+                <td>
+                    <a href="{{ path('app_librarian_book_edit', {id: book.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{{ path('app_book_show', {id: book.id}) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <form method="post" action="{{ path('app_librarian_book_delete', {id: book.id}) }}" class="d-inline"
+                          onsubmit="return confirm('Supprimer ce livre ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_book' ~ book.id) }}">
+                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Aucun livre. <a href="{{ path('app_librarian_book_new') }}">Ajouter le premier</a></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

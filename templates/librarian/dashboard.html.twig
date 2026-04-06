@@ -1,0 +1,36 @@
+{% extends 'librarian/base_librarian.html.twig' %}
+{% block title %}Dashboard Bibliothécaire{% endblock %}
+{% block body %}
+<h2 class="mb-4"><i class="bi bi-archive"></i> Espace Bibliothécaire</h2>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card text-white" style="background:#2c3e6b">
+            <div class="card-body text-center">
+                <i class="bi bi-book" style="font-size:2.5rem"></i>
+                <h3 class="mt-2">{{ total_books }}</h3>
+                <p class="mb-0">Livres dans le catalogue</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <i class="bi bi-hourglass-split" style="font-size:2.5rem"></i>
+                <h3 class="mt-2">{{ pending_reservations|length }}</h3>
+                <p class="mb-0">Réservations en attente</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Actions rapides</h5>
+            <div class="d-grid gap-2">
+                <a href="{{ path('app_librarian_book_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Ajouter un livre</a>
+                <a href="{{ path('app_librarian_reservations') }}" class="btn btn-outline-warning"><i class="bi bi-calendar-check"></i> Voir les réservations</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

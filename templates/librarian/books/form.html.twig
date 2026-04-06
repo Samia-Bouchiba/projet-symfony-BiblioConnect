@@ -1,0 +1,322 @@
+{% extends 'librarian/base_librarian.html.twig' %}
+{% block title %}{{ title }} — BiblioConnect{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-book"></i> {{ title }}</h2>
+    <a href="{{ path('app_librarian_books') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+</div>
+<div class="card p-4">
+    {{ form_start(form, {attr: {enctype: 'multipart/form-data', novalidate: 'novalidate'}}) }}
+
+    {# Affichage des erreurs globales du formulaire #}
+    {% if not form.vars.valid and form.vars.submitted %}
+        <div class="alert alert-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Veuillez corriger les erreurs ci-dessous avant de soumettre.
+        </div>
+    {% endif %}
+
+    <div class="row g-3">
+        {# ── Colonne principale ── #}
+        <div class="col-md-8">
+            <div class="mb-3">
+                {{ form_label(form.title) }}
+                {{ form_widget(form.title, {attr: {class: 'form-control' ~ (form.title.vars.errors|length ? ' is-invalid' : '')}}) }}
+                {% for error in form.title.vars.errors %}
+                    <div class="invalid-feedback d-block">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {attr: {class: 'form-control'}}) }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.isbn) }}
+                    {{ form_widget(form.isbn, {attr: {class: 'form-control'}}) }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    {{ form_label(form.stock) }}
+                    {{ form_widget(form.stock, {attr: {class: 'form-control'}}) }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    {{ form_label(form.publishedAt) }}
+                    {{ form_widget(form.publishedAt, {attr: {class: 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+
+        {# ── Colonne latérale ── #}
+        <div class="col-md-4">
+
+            {# Langue #}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    {{ form_label(form.language, null, {label_attr: {class: 'form-label mb-0'}}) }}
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            data-bs-toggle="modal" data-bs-target="#modalLanguage" title="Nouvelle langue">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                {{ form_widget(form.language, {attr: {class: 'form-select', id: 'book_language'}}) }}
+            </div>
+
+            {# Auteurs #}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    {{ form_label(form.authors, null, {label_attr: {class: 'form-label mb-0'}}) }}
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            data-bs-toggle="modal" data-bs-target="#modalAuthor" title="Nouvel auteur">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                {{ form_widget(form.authors, {attr: {class: 'form-select', size: '5', id: 'book_authors'}}) }}
+                <div class="form-text">Ctrl+clic pour sélection multiple</div>
+            </div>
+
+            {# Catégories #}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    {{ form_label(form.categories, null, {label_attr: {class: 'form-label mb-0'}}) }}
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            data-bs-toggle="modal" data-bs-target="#modalCategory" title="Nouvelle catégorie">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                {{ form_widget(form.categories, {attr: {class: 'form-select', size: '5', id: 'book_categories'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.coverImageFile) }}
+                {{ form_widget(form.coverImageFile) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Enregistrer</button>
+        <a href="{{ path('app_librarian_books') }}" class="btn btn-outline-secondary">Annuler</a>
+    </div>
+    {{ form_end(form) }}
+</div>
+
+{# ── Modal : Nouvelle langue ── #}
+<div class="modal fade" id="modalLanguage" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-translate me-2"></i>Nouvelle langue</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalLanguageError" class="alert alert-danger d-none py-2 small"></div>
+                <div class="mb-3">
+                    <label class="form-label">Nom <span class="text-danger">*</span></label>
+                    <input type="text" id="langName" class="form-control" placeholder="ex. Portugais">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Code ISO</label>
+                    <input type="text" id="langCode" class="form-control" placeholder="ex. pt" maxlength="5">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnCreateLanguage">
+                    <i class="bi bi-plus-circle me-1"></i>Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Modal : Nouvel auteur ── #}
+<div class="modal fade" id="modalAuthor" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Nouvel auteur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalAuthorError" class="alert alert-danger d-none py-2 small"></div>
+                <div class="mb-3">
+                    <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                    <input type="text" id="authorFirstName" class="form-control" placeholder="ex. Victor">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Nom</label>
+                    <input type="text" id="authorLastName" class="form-control" placeholder="ex. Hugo">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnCreateAuthor">
+                    <i class="bi bi-plus-circle me-1"></i>Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Modal : Nouvelle catégorie ── #}
+<div class="modal fade" id="modalCategory" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-tag me-2"></i>Nouvelle catégorie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalCategoryError" class="alert alert-danger d-none py-2 small"></div>
+                <div class="mb-2">
+                    <label class="form-label">Nom <span class="text-danger">*</span></label>
+                    <input type="text" id="catName" class="form-control" placeholder="ex. Bande dessinée">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnCreateCategory">
+                    <i class="bi bi-plus-circle me-1"></i>Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// ─── helper : afficher un toast flash depuis JS ───────────────────────────
+function showFlash(type, message) {
+    const icons = {success:'bi-check-circle-fill', danger:'bi-x-circle-fill', warning:'bi-exclamation-triangle-fill'};
+    const toast = document.createElement('div');
+    toast.className = 'flash-toast alert-' + type;
+    toast.innerHTML =
+        '<i class="bi ' + (icons[type] ?? 'bi-info-circle-fill') + ' flash-icon"></i>' +
+        '<span class="flash-msg">' + message + '</span>' +
+        '<button class="btn-close btn-close-sm" onclick="this.closest(\'.flash-toast\').remove()"></button>';
+    document.getElementById('flashContainer').appendChild(toast);
+    setTimeout(function () {
+        toast.style.transition = 'opacity .4s ease';
+        toast.style.opacity = '0';
+        setTimeout(function () { toast.remove(); }, 400);
+    }, 4000);
+}
+
+// ─── helper : sélectionner ou ajouter une option dans un <select> ─────────
+function selectOrAddOption(selectId, id, name) {
+    const select = document.getElementById(selectId);
+    let opt = select.querySelector('option[value="' + id + '"]');
+    if (!opt) {
+        opt = new Option(name, id);
+        select.appendChild(opt);
+    }
+    opt.selected = true;
+}
+
+// ─── helper générique pour quick-create ──────────────────────────────────
+function quickCreate(url, body, selectId, errorDivId, modalId, label) {
+    const btn = document.querySelector('#' + modalId + ' .btn-primary');
+    btn.disabled = true;
+    const errDiv = document.getElementById(errorDivId);
+    errDiv.className = 'alert d-none py-2 small';
+    errDiv.innerHTML = '';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams(body)
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        if (data.error) {
+            errDiv.className = 'alert alert-danger py-2 small';
+            errDiv.textContent = data.error;
+            return;
+        }
+        if (data.exists) {
+            // Doublon : proposer d'utiliser l'existant
+            errDiv.className = 'alert alert-warning py-2 small';
+            errDiv.innerHTML =
+                '<i class="bi bi-exclamation-triangle-fill me-1"></i>' +
+                '<strong>' + data.name + '</strong> existe déjà. ' +
+                '<button type="button" class="btn btn-sm btn-warning ms-2 py-0 px-2 use-existing" ' +
+                '        data-id="' + data.id + '" data-name="' + data.name + '" ' +
+                '        data-select="' + selectId + '" data-modal="' + modalId + '">' +
+                'Utiliser cet existant</button>';
+            errDiv.querySelector('.use-existing').addEventListener('click', function () {
+                selectOrAddOption(this.dataset.select, this.dataset.id, this.dataset.name);
+                bootstrap.Modal.getInstance(document.getElementById(this.dataset.modal)).hide();
+                showFlash('info', label + ' <strong>' + this.dataset.name + '</strong> sélectionné(e).');
+            });
+            return;
+        }
+        selectOrAddOption(selectId, data.id, data.name);
+        bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+        showFlash('success', label + ' <strong>' + data.name + '</strong> créé(e) et sélectionné(e).');
+    })
+    .catch(function () {
+        errDiv.className = 'alert alert-danger py-2 small';
+        errDiv.textContent = 'Une erreur réseau est survenue.';
+    })
+    .finally(function () { btn.disabled = false; });
+}
+
+// ─── Langue ───────────────────────────────────────────────────────────────
+document.getElementById('btnCreateLanguage').addEventListener('click', function () {
+    quickCreate(
+        '{{ path("app_librarian_language_quick") }}',
+        { name: document.getElementById('langName').value,
+          code: document.getElementById('langCode').value,
+          _token: '{{ csrf_token("quick_language") }}' },
+        'book_language', 'modalLanguageError', 'modalLanguage', 'Langue'
+
+    );
+});
+document.getElementById('modalLanguage').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('langName').value = '';
+    document.getElementById('langCode').value = '';
+    document.getElementById('modalLanguageError').classList.add('d-none');
+});
+
+// ─── Auteur ───────────────────────────────────────────────────────────────
+document.getElementById('btnCreateAuthor').addEventListener('click', function () {
+    quickCreate(
+        '{{ path("app_librarian_author_quick") }}',
+        { firstName: document.getElementById('authorFirstName').value,
+          lastName:  document.getElementById('authorLastName').value,
+          _token: '{{ csrf_token("quick_author") }}' },
+        'book_authors', 'modalAuthorError', 'modalAuthor', 'Auteur'
+    );
+});
+document.getElementById('modalAuthor').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('authorFirstName').value = '';
+    document.getElementById('authorLastName').value  = '';
+    document.getElementById('modalAuthorError').classList.add('d-none');
+});
+
+// ─── Catégorie ────────────────────────────────────────────────────────────
+document.getElementById('btnCreateCategory').addEventListener('click', function () {
+    quickCreate(
+        '{{ path("app_librarian_category_quick") }}',
+        { name: document.getElementById('catName').value,
+          _token: '{{ csrf_token("quick_category") }}' },
+        'book_categories', 'modalCategoryError', 'modalCategory', 'Catégorie'
+    );
+});
+document.getElementById('modalCategory').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('catName').value = '';
+    document.getElementById('modalCategoryError').classList.add('d-none');
+});
+
+// ─── Soumettre avec Entrée dans les modales ───────────────────────────────
+['modalLanguage','modalAuthor','modalCategory'].forEach(function(id) {
+    document.getElementById(id).addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.querySelector('#' + id + ' .btn-primary').click();
+        }
+    });
+});
+</script>
+{% endblock %}

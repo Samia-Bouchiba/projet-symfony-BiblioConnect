@@ -1,0 +1,78 @@
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Commentaires — Admin{% endblock %}
+{% block body %}
+<h2 class="mb-4"><i class="bi bi-chat-left-text"></i> Modération des commentaires</h2>
+
+{% if pending is not empty %}
+<div class="card border-warning mb-4">
+    <div class="card-header bg-warning text-dark fw-bold">
+        <i class="bi bi-exclamation-triangle"></i> En attente de modération ({{ pending|length }})
+    </div>
+    <table class="table mb-0">
+        <thead><tr><th>Utilisateur</th><th>Livre</th><th>Note</th><th>Commentaire</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for comment in pending %}
+            <tr>
+                <td>{{ comment.user.fullName }}</td>
+                <td>{{ comment.book.title }}</td>
+                <td>{{ comment.rating }}/5</td>
+                <td>{{ comment.content }}</td>
+                <td>{{ comment.createdAt|date('d/m/Y') }}</td>
+                <td class="d-flex gap-1">
+                    <form method="post" action="{{ path('app_admin_comment_approve', {id: comment.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ comment.id) }}">
+                        <button class="btn btn-sm btn-success">Approuver</button>
+                    </form>
+                    <form method="post" action="{{ path('app_admin_comment_delete', {id: comment.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment' ~ comment.id) }}">
+                        <button class="btn btn-sm btn-danger">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <div class="alert alert-success mb-4">Aucun commentaire en attente de modération.</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header fw-bold">Tous les commentaires ({{ all|length }})</div>
+    <table class="table mb-0">
+        <thead><tr><th>Utilisateur</th><th>Livre</th><th>Note</th><th>Commentaire</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for comment in all %}
+            <tr>
+                <td>{{ comment.user.fullName }}</td>
+                <td>
+                    <a href="{{ path('app_book_show', {id: comment.book.id}) }}" class="text-decoration-none">
+                        {{ comment.book.title }}
+                    </a>
+                </td>
+                <td>{{ comment.rating }}/5</td>
+                <td>{{ comment.content|slice(0, 100) }}{% if comment.content|length > 100 %}…{% endif %}</td>
+                <td class="small text-muted">{{ comment.createdAt|date('d/m/Y') }}</td>
+                <td>
+                    <span class="badge {{ comment.approved ? 'bg-success' : 'bg-warning text-dark' }}">
+                        {{ comment.approved ? 'Approuvé' : 'En attente' }}
+                    </span>
+                </td>
+                <td class="d-flex gap-1 flex-wrap">
+                    {% if not comment.approved %}
+                        <form method="post" action="{{ path('app_admin_comment_approve', {id: comment.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ comment.id) }}">
+                            <button class="btn btn-sm btn-success">Approuver</button>
+                        </form>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_admin_comment_delete', {id: comment.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment' ~ comment.id) }}">
+                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
